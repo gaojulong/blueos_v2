@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # Set desired version to be installed
-VERSION="${VERSION:-master}"
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-bluerobotics/BlueOS}
-DOCKER_USER=${DOCKER_USER:-$(echo $GITHUB_REPOSITORY | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]')}
+VERSION="${VERSION:-1.4.2}"
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-gaojulong/blueos_v2}
+DOCKER_USER=${DOCKER_USER:-gaojulong}
 REMOTE="${REMOTE:-https://raw.githubusercontent.com/${GITHUB_REPOSITORY}}"
 ROOT="$REMOTE/$VERSION"
 
@@ -209,7 +209,7 @@ docker pull $BLUEOS_BOOTSTRAP
 docker pull $BLUEOS_CORE
 
 # Set up default extensions
-curl -fsSL $ROOT/install/kraken/set_default_extensions.sh | bash
+# curl -fsSL $ROOT/install/kraken/set_default_extensions.sh | bash
 
 # Use current release version for factory fallback
 docker image tag $BLUEOS_CORE $BLUEOS_FACTORY

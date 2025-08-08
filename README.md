@@ -76,13 +76,148 @@ core/services/helper/main.py - 将SKIP_PORTS中的BlueOS端口从80改为2770
 
 ### 修改core中的启动备份固件
 
+- 修改检测端口为2770
 
+  ~~~
+  # blueos-self/bootstrap/bootstrap/bootstrap.py
+  
+  response = requests.get("http://localhost:2770/version-chooser/v1.0/version/current", timeout=10)
+  ~~~
+
+- 修改启动备份固件
+
+  ~~~
+  # bootstrap/startup.json.default
+  
+          "tag": "master",
+          "image": "gaojulong/blueos-core",
+          "enabled": true,
+          "webui": false,
+          "network": "host",
+  ~~~
+
+  
 
 ### 修改mav2r
 
 
 
-### 在系统中安装常用库和依赖
+### 在系统中安装新版固件和常用库和依赖
+
+~~~
+sudo apt-get install vim 
+
+~~~
+
+
+
+
+
+**配置docker代理**
+
+~~~
+sudo mkdir -p /etc/systemd/system/docker.service.d/
+sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
+~~~
+
+**内容如下：**
+
+~~~
+[Service]
+Environment="HTTP_PROXY=http://127.0.0.1:10808/"
+Environment="HTTPS_PROXY=http://127.0.0.1:10808/"
+~~~
+
+**重启**
+
+~~~
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+~~~
+
+**配置DHCP防止容易启动失败时断开与树莓派的联系**
+
+~~~shell
+sudo nano /etc/dhcpcd.conf
+~~~
+
+**在文件中添加配置信息**
+
+~~~tex
+interface eth0
+static ip_address=192.168.2.2/24
+static routers=192.168.2.1
+~~~
+
+**重启dhcp**
+
+~~~shell
+sudo service dhcpcd restart
+~~~
+
+**删除原有的镜像**
+
+~~~
+docker stop blueos-bootstrap
+docker rm blueos-bootstrap
+docker stop blueos-core
+docker rm blueos-core
+docker rmi bluerobotics/blueos-core:factory
+~~~
+
+# 配置docker代理
+
+~~~
+docker pull gaojulong/blueos-core:1.4.2
+docker pull gaojulong/blueos-core:1.1.0-main.1 
+docker pull gaojulong/blueos-bootstrap:1.4.2
+
+#已有的 Docker 镜像打一个新的标签
+docker image tag gaojulong/blueos-core:1.1.0-main.1 gaojulong/blueos-core:master
+~~~
+
+
+
+### 注意事项
+
+在树莓派系统中确认/.config/blueos/bootstrap文件下的startup.json文件，修改默认启动版本为1.4.2
+
+![image-20250808170642606](images/image-20250808170642606.png)
+
+~~~
+docker create \
+    -t \
+    --restart unless-stopped \
+    --name blueos-bootstrap \
+    --net=host \
+    -v $HOME/.config/blueos/bootstrap:/root/.config/bootstrap \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/logs/blueos:/var/logs/blueos \
+    -e BLUEOS_CONFIG_PATH=$HOME/.config/blueos \
+    gaojulong/blueos-bootstrap:1.4.2
+~~~
+
+~~~
+docker start blueos-bootstrap
+~~~
+
+~~~
+docker run -it --rm \
+  --network host \
+  --privileged \
+  -v /dev/:/dev/:rw \
+  -v /sys/:/sys/:rw \
+  -v /var/run/docker.sock:/var/run/docker.sock:rw \
+  -v /var/logs/blueos:/var/logs/blueos:rw \
+  -v /run/udev:/run/udev:ro \
+  -v /etc/blueos:/etc/blueos:rw \
+  -v /etc/machine-id:/etc/machine-id:ro \
+  -v /usr/blueos/userdata:/usr/blueos/userdata:rw \
+  -v /usr/blueos/extensions:/usr/blueos/extensions:rw \
+  -v /root/.config:/root/.config:rw \
+  gaojulong/blueos-core:1.4.2 \
+  /bin/bash -c "/usr/bin/start-blueos-core && sleep infinity"
+~~~
 
 
 
