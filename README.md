@@ -9,10 +9,82 @@
 [![Latest Beta](https://img.shields.io/github/v/tag/bluerobotics/blueos.svg?label=Latest%20Beta)
 ![Date](https://img.shields.io/github/release-date-pre/bluerobotics/blueos?label=Date)](https://github.com/bluerobotics/BlueOS/releases)
 
-
 [![Docker](https://img.shields.io/docker/v/bluerobotics/blueos-core?label=Docker&style=flat)
 ![Pulls](https://img.shields.io/docker/pulls/bluerobotics/blueos-core?label=Pulls)
 ![Size](https://img.shields.io/docker/image-size/bluerobotics/blueos-core?label=Size)](https://hub.docker.com/r/bluerobotics/blueos-core/tags)
+
+### 注意事项
+
+- 使用git clone拉去仓库、git bash工具提交、vscode修改文件，否则在window平台可能会更改.sh的脚本权限，导致无法自动部署
+
+- 在仓库中配置Docker用户名和密码
+
+
+
+### 将80端口改为2770
+
+core/tools/nginx/nginx.conf - 将nginx服务器的监听端口从80改为2770
+
+~~~
+# 47行
+    server {
+        listen 2770; # IPv4
+        listen [::]:2770; # IPv6
+~~~
+
+
+
+core/services/beacon/default-settings.json - 将HTTP服务发现端口从80改为2770
+
+~~~
+36行
+      {
+        "name": "_http",
+        "protocol": "_tcp",
+        "port": 2770
+      }
+~~~
+
+
+
+install/network/blueos.service - 将Avahi服务发现配置中的HTTP端口从80改为2770
+
+~~~
+# 8行
+    <port>2770</port>
+~~~
+
+
+
+core/services/helper/main.py - 将SKIP_PORTS中的BlueOS端口从80改为2770
+
+~~~
+    SKIP_PORTS: Set[int] = {
+        22,  # SSH
+        2770,  # BlueOS
+        5201,  # Iperf
+        6021,  # Mavlink Camera Manager's WebRTC signaller
+        7000,  # Major Tom does not have a public API yet
+        8554,  # Mavlink Camera Manager's RTSP server
+        5777,  # ardupilot-manager's Mavlink TCP Server
+        5555,  # DGB server
+        2770,  # NGINX
+    }
+~~~
+
+
+
+### 修改core中的启动备份固件
+
+
+
+### 修改mav2r
+
+
+
+### 在系统中安装常用库和依赖
+
+
 
 BlueOS is a modular, robust, and efficient platform for managing a vehicle or robot from its [onboard computer](https://blueos.cloud/docs/hardware/required/onboard-computer/). It is the evolution of the Companion project, which aimed to route a vehicle's video stream and communications to its [control station computer](https://blueos.cloud/docs/hardware/required/control-computer/). Recognizing the need for a more sophisticated and scalable system, BlueOS was created from the ground up, embracing modularity to ensure portability, robust updating, and extensibility.
 
