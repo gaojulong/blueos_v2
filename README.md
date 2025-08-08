@@ -180,7 +180,9 @@ docker image tag gaojulong/blueos-core:1.1.0-main.1 gaojulong/blueos-core:master
 
 ### 注意事项
 
-在树莓派系统中确认/.config/blueos/bootstrap文件下的startup.json文件，修改默认启动版本为1.4.2
+- 必须是blueos对应的linux版本
+
+- 在树莓派系统中确认/.config/blueos/bootstrap文件下的startup.json文件，修改默认启动版本为1.4.2
 
 ![image-20250808170642606](images/image-20250808170642606.png)
 
@@ -201,23 +203,7 @@ docker create \
 docker start blueos-bootstrap
 ~~~
 
-~~~
-docker run -it --rm \
-  --network host \
-  --privileged \
-  -v /dev/:/dev/:rw \
-  -v /sys/:/sys/:rw \
-  -v /var/run/docker.sock:/var/run/docker.sock:rw \
-  -v /var/logs/blueos:/var/logs/blueos:rw \
-  -v /run/udev:/run/udev:ro \
-  -v /etc/blueos:/etc/blueos:rw \
-  -v /etc/machine-id:/etc/machine-id:ro \
-  -v /usr/blueos/userdata:/usr/blueos/userdata:rw \
-  -v /usr/blueos/extensions:/usr/blueos/extensions:rw \
-  -v /root/.config:/root/.config:rw \
-  gaojulong/blueos-core:1.4.2 \
-  /bin/bash -c "/usr/bin/start-blueos-core && sleep infinity"
-~~~
+
 
 
 
