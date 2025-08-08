@@ -36,7 +36,7 @@
       {
         "name": "_http",
         "protocol": "_tcp",
-        "port": 80
+        "port": 2770
       }
     ]
   }
